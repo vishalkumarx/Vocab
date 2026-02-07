@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Learning Hub</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">📚 Vocab Hub</h1>
+                <p class="tagline">Master vocabulary across subjects</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- Subject Filter Tabs -->
+            <section class="subject-section">
+                <h2 class="section-title">Select Subject</h2>
+                <div class="subject-tabs" id="subjectTabs">
+                    <button class="subject-tab active" data-subject="all">
+                        All Subjects
+                    </button>
+                    <button class="subject-tab" data-subject="Polity">
+                        Polity
+                    </button>
+                    <button class="subject-tab" data-subject="Economy">
+                        Economy
+                    </button>
+                    <button class="subject-tab" data-subject="Geography">
+                        Geography
+                    </button>
+                    <button class="subject-tab" data-subject="History">
+                        History
+                    </button>
+                    <button class="subject-tab" data-subject="Environment">
+                        Environment
+                    </button>
+                    <button class="subject-tab" data-subject="Science & Tech">
+                        Science & Tech
+                    </button>
+                    <button class="subject-tab" data-subject="Ethics">
+                        Ethics
+                    </button>
+                </div>
+            </section>
+
+            <!-- Add Vocabulary Section -->
+            <section class="add-vocab-section">
+                <div class="section-header">
+                    <h2 class="section-title">Add New Vocabulary</h2>
+                    <button class="toggle-form-btn" id="toggleFormBtn">
+                        <span class="btn-text">Show Form</span>
+                        <span class="btn-icon">▼</span>
+                    </button>
+                </div>
+                
+                <div class="form-container" id="formContainer">
+                    <form id="vocabForm" class="vocab-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="word">Word *</label>
+                                <div class="input-with-button">
+                                    <input 
+                                        type="text" 
+                                        id="word" 
+                                        name="word" 
+                                        placeholder="Enter vocabulary word"
+                                        required
+                                    >
+                                    <button 
+                                        type="button" 
+                                        class="fetch-meaning-btn" 
+                                        id="fetchMeaningBtn"
+                                        title="Auto-fetch meaning from internet"
+                                    >
+                                        <span class="fetch-icon">🔍</span>
+                                        <span class="fetch-text">Get Meaning</span>
+                                        <span class="fetch-loader"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="subject">Subject *</label>
+                                <select id="subject" name="subject" required>
+                                    <option value="">Select Subject</option>
+                                    <option value="Polity">Polity</option>
+                                    <option value="Economy">Economy</option>
+                                    <option value="Geography">Geography</option>
+                                    <option value="History">History</option>
+                                    <option value="Environment">Environment</option>
+                                    <option value="Science & Tech">Science & Tech</option>
+                                    <option value="Ethics">Ethics</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="meaning">Meaning *</label>
+                            <textarea 
+                                id="meaning" 
+                                name="meaning" 
+                                rows="3"
+                                placeholder="Enter the meaning or definition"
+                                required
+                            ></textarea>
+                            <!-- Suggestions box for auto-fetched meanings -->
+                            <div class="meaning-suggestions" id="meaningSuggestions"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="example">Example Usage (Optional)</label>
+                            <textarea 
+                                id="example" 
+                                name="example" 
+                                rows="2"
+                                placeholder="Enter an example sentence using this word"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span class="btn-loader" id="btnLoader"></span>
+                                <span class="btn-text" id="btnText">Add Vocabulary</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="resetBtn">
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success/Error Message -->
+                    <div class="message" id="message"></div>
+                </div>
+            </section>
+
+            <!-- Vocabulary Display Section -->
+            <section class="vocab-display-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span id="currentSubjectTitle">All Vocabulary</span>
+                        <span class="vocab-count" id="vocabCount"></span>
+                    </h2>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading vocabulary...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📖</div>
+                    <h3>No vocabulary found</h3>
+                    <p>Be the first to add vocabulary words for this subject!</p>
+                </div>
+
+                <!-- Vocabulary Grid -->
+                <div class="vocab-grid" id="vocabGrid">
+                    <!-- Vocabulary cards will be dynamically inserted here -->
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Vocabulary Learning Hub. Built with Firebase & Vanilla JS</p>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK (v9+ Modular) -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, where, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // ====================================================================
+        // FIREBASE CONFIGURATION
+        // ====================================================================
+        // TODO: Replace with your Firebase project configuration
+        // Get this from: Firebase Console > Project Settings > Your apps > SDK setup and configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase instances available globally for script.js
+        window.db = db;
+        window.firebaseModules = {
+            collection,
+            addDoc,
+            query,
+            orderBy,
+            onSnapshot,
+            where,
+            Timestamp
+        };
+
+        // Trigger the app initialization after Firebase is ready
+        window.dispatchEvent(new Event('firebaseReady'));
+    </script>
+
+    <!-- Main Application Script -->
+    <script src="script.js"></script>
+</body>
+</html>
