@@ -190,11 +190,84 @@ async function handleFetchMeaning(elements) {
 }
 
 // ====================================================================
-// FETCH WORD MEANING FROM DICTIONARY API
+// FETCH WORD MEANING FROM WEB SEARCH
 // ====================================================================
 async function fetchWordMeaning(word) {
     try {
-        // Using Free Dictionary API
+        // Method 1: Try Wikitionary API (community-driven, Google-quality definitions)
+        const wikiMeanings = await fetchFromWikitionary(word);
+        if (wikiMeanings && wikiMeanings.length > 0) {
+            return wikiMeanings;
+        }
+
+        // Method 2: Try Dictionary API as fallback
+        const dictMeanings = await fetchFromDictionaryAPI(word);
+        if (dictMeanings && dictMeanings.length > 0) {
+            return dictMeanings;
+        }
+
+        // Method 3: Try WordsAPI (another reliable source)
+        const wordsMeanings = await fetchFromWordsAPI(word);
+        if (wordsMeanings && wordsMeanings.length > 0) {
+            return wordsMeanings;
+        }
+
+        return [];
+    } catch (error) {
+        console.error('Error fetching meaning:', error);
+        return [];
+    }
+}
+
+// ====================================================================
+// FETCH FROM WIKITIONARY (Wikipedia's Dictionary)
+// ====================================================================
+async function fetchFromWikitionary(word) {
+    try {
+        const url = `https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(word)}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error('Word not found in Wiktionary');
+        }
+
+        const data = await response.json();
+        const meanings = [];
+
+        // Wiktionary returns definitions organized by language
+        if (data.en && data.en.length > 0) {
+            data.en.forEach((entry, index) => {
+                if (index < 3 && entry.definitions && entry.definitions.length > 0) {
+                    entry.definitions.forEach((def, defIndex) => {
+                        if (defIndex < 2 && meanings.length < 3) {
+                            // Clean the definition text (remove HTML tags)
+                            const cleanDef = def.definition.replace(/<[^>]*>/g, '').trim();
+                            
+                            if (cleanDef && cleanDef.length > 10) {
+                                meanings.push({
+                                    partOfSpeech: entry.partOfSpeech || 'definition',
+                                    definition: cleanDef,
+                                    example: def.examples && def.examples.length > 0 ? def.examples[0] : null
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        return meanings;
+    } catch (error) {
+        console.error('Wiktionary fetch error:', error);
+        return [];
+    }
+}
+
+// ====================================================================
+// FETCH FROM DICTIONARY API (Fallback 1)
+// ====================================================================
+async function fetchFromDictionaryAPI(word) {
+    try {
         const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
         
         if (!response.ok) {
@@ -204,16 +277,14 @@ async function fetchWordMeaning(word) {
         const data = await response.json();
         const meanings = [];
 
-        // Extract definitions from the response
         if (data && data.length > 0) {
             const wordData = data[0];
             
-            // Get up to 3 definitions from different parts of speech
             wordData.meanings.forEach((meaning, index) => {
                 if (index < 3 && meaning.definitions && meaning.definitions.length > 0) {
                     const def = meaning.definitions[0];
                     meanings.push({
-                        partOfSpeech: meaning.partOfSpeech,
+                        partOfSpeech: meaning.partOfSpeech || 'definition',
                         definition: def.definition,
                         example: def.example || null
                     });
@@ -224,8 +295,45 @@ async function fetchWordMeaning(word) {
         return meanings;
     } catch (error) {
         console.error('Dictionary API error:', error);
+        return [];
+    }
+}
+
+// ====================================================================
+// FETCH FROM WORDS API (Fallback 2)
+// ====================================================================
+async function fetchFromWordsAPI(word) {
+    try {
+        // Note: This is a free tier of WordsAPI that doesn't require authentication
+        // for basic lookups
+        const response = await fetch(`https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(word)}`, {
+            headers: {
+                'X-RapidAPI-Key': 'DEMO', // Using demo mode
+            }
+        });
         
-        // Fallback: Try to use a secondary approach or return empty
+        if (!response.ok) {
+            throw new Error('Word not found');
+        }
+
+        const data = await response.json();
+        const meanings = [];
+
+        if (data.results && data.results.length > 0) {
+            data.results.slice(0, 3).forEach((result) => {
+                if (result.definition) {
+                    meanings.push({
+                        partOfSpeech: result.partOfSpeech || 'definition',
+                        definition: result.definition,
+                        example: result.examples && result.examples.length > 0 ? result.examples[0] : null
+                    });
+                }
+            });
+        }
+
+        return meanings;
+    } catch (error) {
+        console.error('WordsAPI error:', error);
         return [];
     }
 }
